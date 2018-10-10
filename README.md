@@ -14,6 +14,10 @@
     1) Navigate to https://cs.nyu.edu/~kcho/DMQA/ - download 'stories' from CNN dataset
     2) Unzip the file.
     3) Update the paths in config.py as per you machine.
+    4) Navigate to https://www.kaggle.com/yesbutwhatdoesitmean/wikinews300d1mvec and download
+    5) create model folder (same place where we have data folder)
+    6) Unzip vector and put inside model folder.
+    7) Verify the paths in config.py
     
 **Steps to train model**
 

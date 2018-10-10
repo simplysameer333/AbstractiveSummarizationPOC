@@ -22,17 +22,17 @@ embedding_dim = config.embedding_dim
 
 
 def create_or_load_model():
-    model_pickle = Path(config.base_path + config.model_pickle_filename)
+    model_pickle = Path(config.model_path + config.model_pickle_filename)
     if model_pickle.exists():
         print("Loading Pre-Trained Model Pickle..... ")
         start = time.perf_counter()
-        with open(config.base_path + config.model_pickle_filename, 'rb') as handle:
+        with open(config.model_path + config.model_pickle_filename, 'rb') as handle:
             model = pickle.load(handle)
         print("Loaded Pre-Trained Model Pickle, time taken", ((time.perf_counter() - start) / 60))
     else:
         print("Loading Pre-Trained Model  ..... ")
         start = time.perf_counter()
-        model = KeyedVectors.load_word2vec_format(config.model_path, binary=False)
+        model = KeyedVectors.load_word2vec_format(config.model_path + config.model_org_filename, binary=False)
         with open(config.base_path + config.model_pickle_filename, 'wb') as handle:
             pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
         print("Loaded Pre-Trained Model, time taken", ((time.perf_counter() - start) / 60))
