@@ -1,0 +1,8 @@
+**/build/*
+**/list/*
+**/ML.egg-info/*
+**/.idea/*
+**/dist/*
+**/logs/*
+**/__pycache__/*
+**/ML.egg-info/*
