@@ -7,11 +7,13 @@ import build_model
 import config
 import vectorization
 
+
 # This could later be improved as tensorflow provide that put padding by it owns.
 def pad_sentence_batch(sentence_batch, vocab_to_int):
     """Pad sentences with <PAD> so that each sentence of a batch has the same length"""
     max_sentence = max([len(sentence) for sentence in sentence_batch])
-    padded_batch  = [sentence + [vocab_to_int['<PAD>']] * (max_sentence - len(sentence)) for sentence in sentence_batch]
+    padded_batch = [sentence + [vocab_to_int['<PAD>']] * (max_sentence - len(sentence))
+                    for sentence in sentence_batch]
     # print ("padded  ==== > ", padded_batch)
     return padded_batch
 
@@ -47,14 +49,18 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
     checkpoint = "best_model.ckpt"
 
     # This make sures that in one epoch it only checked as per value specified of per_epoch
-    # e.g if length of article is 4000 the => 4000 / 32 (bath size) = > 125 (it means we will have 125 loops in 1 epoch)
-    # then 125 / 3 - 1 = 40 (so while covering 125 iteartion per epoch after 40 iteration it will check and print the loss)
-    update_check = (len(sorted_articles_short) // config.batch_size // config.per_epoch) - 1
+    # e.g if length of article is 4000 the => 4000 / 32 (bath size) = > 125
+    # (it means we will have 125 loops in 1 epoch)  then 125 / 3 - 1 = 40
+    # (so while covering 125 iteration per epoch after 40 iteration
+    # it will check and print the loss)
+    update_check = (len(sorted_articles_short) // config.batch_size
+                    // config.per_epoch) - 1
     print("init value of update_check", update_check)
+    gr_learning_rate = config.learning_rate
 
     with tf.Session(graph=train_graph) as sess:
         # This is to show graph in tensorboard
-        # G:\Python\MLLearning\MachineLearning\POC > tensorboard --logdir = logs - -port 6006
+        # project path tensorboard --logdir = logs - -port 6006
         # TensorBoard 1.10.0 at http: // Sam: 6006(Press CTRL + C to quit)
         writer = tf.summary.FileWriter('logs', graph=sess.graph)
         sess.run(tf.global_variables_initializer())
@@ -66,15 +72,17 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
         for epoch_i in range(1, config.epochs + 1):
             update_loss = 0
             batch_loss = 0
-            for batch_i, (headlines_batch, articles_batch, headlines_lengths, articles_lengths) in enumerate(
-                    get_batches(sorted_headlines_short, sorted_articles_short, config.batch_size, vocab_to_int)):
+            for batch_i, (headlines_batch, articles_batch, headlines_lengths,
+                          articles_lengths) in enumerate(get_batches(sorted_headlines_short,
+                                                                     sorted_articles_short, config.batch_size,
+                                                                     vocab_to_int)):
                 print("batch_i ==== ", batch_i)
                 start_time = time.time()
                 _, loss = sess.run(
                     [train_op, cost],
                     {gen_input_data: articles_batch,
                      gen_targets: headlines_batch,
-                     gen_lr: config.learning_rate,
+                     gen_lr: gr_learning_rate,
                      gen_headline_length: headlines_lengths,
                      gen_article_length: articles_lengths,
                      gen_keep_prob: config.keep_probability})
@@ -84,7 +92,8 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
                 end_time = time.time()
                 batch_time = end_time - start_time
 
-                # This prints status after value specified in display_step. Helps to to see progress
+                # This prints status after value specified in display_step.
+                # Helps to to see progress
                 if batch_i % config.display_step == 0 and batch_i > 0:
                     print('Epoch {}/{} Batch {}/{} - Loss: {:>6.3f}, Seconds: {:>4.2f}'
                           .format(epoch_i,
@@ -115,20 +124,21 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
                     update_loss = 0
 
             # Reduce learning rate, but not below its minimum value
-            learning_rate *= config.learning_rate_decay
-            if learning_rate < config.min_learning_rate:
-                learning_rate = config.min_learning_rate
+            gr_learning_rate *= config.learning_rate_decay
+            if gr_learning_rate < config.min_learning_rate:
+                gr_learning_rate = config.min_learning_rate
 
             if stop_early == config.stop:
                 print("Stopping Training.")
                 break
 
-
 def main():
     print("Prepare input parameters ...")
-    sorted_articles, sorted_headlines, vocab_to_int, word_embedding_matrix = vectorization.create_input_for_graph()
+    sorted_articles, sorted_headlines, vocab_to_int, word_embedding_matrix \
+        = vectorization.create_input_for_graph()
     print("Build Graph parameters ...")
-    train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr, gen_keep_prob, gen_headline_length, gen_max_headline_length, \
+    train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr, gen_keep_prob, \
+    gen_headline_length, gen_max_headline_length, \
     gen_article_length = build_model.build_graph(vocab_to_int, word_embedding_matrix)
 
     # Subset the data for training, this is used to check if steps are working fine.
@@ -144,9 +154,9 @@ def main():
     print("The shortest text length:", len(sorted_articles_short[0]))
     print("The longest text length:", len(sorted_articles_short[-1]))
 
-    train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr, gen_keep_prob,
-                gen_headline_length, gen_max_headline_length, gen_article_length,
-                sorted_headlines_short, sorted_articles_short, vocab_to_int)
+    train_model(train_graph, train_op, cost, gen_input_data, gen_targets,
+                gen_lr, gen_keep_prob, gen_headline_length, gen_max_headline_length,
+                gen_article_length, sorted_headlines_short, sorted_articles_short, vocab_to_int)
 
 
 '''-------------------------main------------------------------'''

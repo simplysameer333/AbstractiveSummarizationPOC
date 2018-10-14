@@ -150,33 +150,6 @@ def decoding_layer(dec_embed_input, embeddings, enc_output, enc_state, vocab_siz
                                                      normalize=False, name='BahdanauAttention')
 
     dec_cell = tf.contrib.seq2seq.AttentionWrapper(dec_cell, attn_mech, rnn_size)
-
-    # tf.contrib.seq2seq.AttentionWrapperState(
-    #     cell_state=enc_state,
-    #     time=tf.zeros([], dtype=tf.int32),
-    #    attention=_zero_state_tensors(rnn_size, batch_size, tf.float32),
-    #    alignments=self._attention_mechanism.initial_alignments(
-    #        batch_size, dtype),
-    #    alignment_history=alignment_history)
-
-
-    # initial_state = tf.contrib.seq2seq.DynamicAttentionWrapperState(enc_state[0],  _zero_state_tensors(rnn_size,
-    #                                                                                   batch_size,
-    #                                                                                 tf.float32))
-    # alignment_history = ()
-    # attention_state = ()
-    # initial_state = tf.contrib.seq2seq.AttentionWrapperState( cell_state=enc_state[0],
-    #                                                                time=tf.zeros([], dtype=tf.int32),
-    #                                                                attention=_zero_state_tensors(rnn_size, batch_size,
-    #                                                                                              tf.float32),
-    #                                                                alignments=attn_mech.initial_alignments(
-    #                                                                    batch_size, tf.float32),
-    #                                                                alignment_history=alignment_history,
-    #                                                                attention_state = attention_state
-    #                                                                )
-
-    # initializing the initial state, layer it would be update by output from one cell
-    # initial_state = dec_cell.zero_state(batch_size=batch_size, dtype=tf.float32)
     initial_state = dec_cell.zero_state(batch_size=batch_size, dtype=enc_state[0].dtype).clone(cell_state=enc_state[0])
 
     # Creating training logits - which would be used during training dataset
@@ -200,7 +173,6 @@ def decoding_layer(dec_embed_input, embeddings, enc_output, enc_state, vocab_siz
                                                     batch_size)
 
     return training_logits, inference_logits
-
 
 
 def seq2seq_model(input_data, target_data, keep_prob, article_length, headline_length, max_headliney_length,
@@ -251,7 +223,8 @@ def build_graph(vocab_to_int, word_embedding_matrix):
     with train_graph.as_default():
         # Load the model inputs
         print("Load input parameter ...")
-        input_data, targets, lr, keep_prob, headline_length, max_headline_length, article_length = model_inputs()
+        input_data, targets, lr, keep_prob, headline_length, max_headline_length, \
+        article_length = model_inputs()
 
         # Create the training and inference logits
         print("Create instance of seq2seq model parameter ...")
@@ -291,12 +264,13 @@ def build_graph(vocab_to_int, word_embedding_matrix):
 
             # Gradient Clipping
             gradients = optimizer.compute_gradients(cost)
-            capped_gradients = [(tf.clip_by_value(grad, -5., 5.), var) for grad, var in gradients if grad is not None]
+            capped_gradients = [(tf.clip_by_value(grad, -5., 5.), var)
+                                for grad, var in gradients if grad is not None]
             train_op = optimizer.apply_gradients(capped_gradients)
     print("Graph is built.")
     # input_data, targets, lr, keep_prob, headline_length, max_headline_length, article_length
-    return train_graph, train_op, cost, input_data, targets, lr, keep_prob, headline_length, max_headline_length, \
-           article_length
+    return train_graph, train_op, cost, input_data, targets, lr, keep_prob, \
+           headline_length, max_headline_length, article_length
 
 def main():
     print('TensorFlow Version: {}'.format(tf.__version__))  # we are using 1.10
