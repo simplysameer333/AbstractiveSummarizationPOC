@@ -5,6 +5,7 @@
 **/dist/*
 **/logs/*
 **/__pycache__/*
+**/code/__pycache__/*
 **/ML.egg-info/*
 **/model/*
 **/.ipynb_checkpoints/*

@@ -1,8 +1,7 @@
 import tensorflow as tf
 from tensorflow.python.layers.core import Dense
 
-import config
-import vectorization
+from code import config, vectorization
 
 # Getting the Hyperparameters
 epochs = config.epochs
@@ -96,7 +95,7 @@ def inference_decoding_layer(embeddings, start_token, end_token, dec_cell, initi
     start_tokens = tf.tile(tf.constant([start_token], dtype=tf.int32), [batch_size], name='start_tokens')
     '''
     # For Basic decoder
-    # GreedyEmbeddingHelper - > Select top probability output
+    # GreedyEmbeddingHelper - > Select top probability out
     inference_helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(embeddings,
                                                                 start_tokens,
                                                                 end_token)
@@ -141,7 +140,7 @@ def decoding_layer(dec_embed_input, embeddings, enc_output, enc_state, vocab_siz
             lstm = tf.contrib.rnn.LSTMCell(rnn_size, initializer=tf.random_uniform_initializer(-0.1, 0.1, seed=2))
             dec_cell = tf.contrib.rnn.DropoutWrapper(lstm, input_keep_prob=keep_prob)
 
-    # creating Dense- This is also called output layer. This will produce the summary.
+    # creating Dense- This is also called out layer. This will produce the summary.
     output_layer = Dense(vocab_size, activation='relu', kernel_initializer=
     tf.truncated_normal_initializer(mean=0.0, stddev=0.1))
 
@@ -161,7 +160,7 @@ def decoding_layer(dec_embed_input, embeddings, enc_output, enc_state, vocab_siz
                                                output_layer,
                                                max_headline_length)
 
-    # Creating inference logits - which would produce output using train model
+    # Creating inference logits - which would produce out using train model
     with tf.variable_scope("decode", reuse=True):
         inference_logits = inference_decoding_layer(embeddings,
                                                     vocab_to_int['<GO>'],

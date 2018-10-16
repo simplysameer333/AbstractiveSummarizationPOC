@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from gensim.models.keyedvectors import KeyedVectors
 
-import config
+from code import config
 
 ''' Expected generated parameter
 clean_articles -> articles after removing impurities

@@ -3,9 +3,7 @@ import time
 import numpy as np
 import tensorflow as tf
 
-import build_model
-import config
-import vectorization
+from code import config, build_model, vectorization
 
 
 # This could later be improved as tensorflow provide that put padding by it owns.
@@ -46,7 +44,7 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
     headlines_update_loss = []
 
     # name given to checkpoint
-    checkpoint = "best_model.ckpt"
+    checkpoint = "./../out/best_model.ckpt"
 
     # This make sures that in one epoch it only checked as per value specified of per_epoch
     # e.g if length of article is 4000 the => 4000 / 32 (bath size) = > 125
@@ -62,7 +60,7 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
         # This is to show graph in tensorboard
         # project path tensorboard --logdir = logs - -port 6006
         # TensorBoard 1.10.0 at http: // Sam: 6006(Press CTRL + C to quit)
-        writer = tf.summary.FileWriter('logs', graph=sess.graph)
+        tf.summary.FileWriter('../logs', graph=sess.graph)
         sess.run(tf.global_variables_initializer())
 
         # If we want to continue training a previous session

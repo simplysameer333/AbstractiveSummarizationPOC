@@ -1,8 +1,7 @@
 import tensorflow as tf
 from tensorflow.python.layers.core import Dense
 
-import config
-import vectorization
+from code import config, vectorization
 
 print('TensorFlow Version: {}'.format(tf.__version__))
 

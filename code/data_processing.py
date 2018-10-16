@@ -6,7 +6,7 @@ from os import listdir
 import nltk
 from nltk.corpus import wordnet
 
-import config
+from code import config
 
 # Stopword list
 # nltk.download()

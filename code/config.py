@@ -1,12 +1,13 @@
 #base_path = 'G:\\AI\\data\\cnn\\'
-base_path = 'data\\'
+base_path = '../data/'
 path = base_path + 'sample_5k\\'
 #path = base_path + 'stories\\'
 articles_pickle_filename = "articles.pickle"
 headlines_pickle_filename = "headlines.pickle"
 
-''' https://fasttext.cc/docs/en/english-vectors.html or https://www.kaggle.com/yesbutwhatdoesitmean/wikinews300d1mvec'''
-model_path = 'model\\'
+''' https://fasttext.cc/docs/en/english-vectors.html 
+    or https://www.kaggle.com/yesbutwhatdoesitmean/wikinews300d1mvec'''
+model_path = '../model/'
 model_org_filename = 'wiki-news-300d-1M.vec'
 model_pickle_filename = "model.pickle"
 word_embedding_matrix_filename = "word_embedding_matrix.pickle"
