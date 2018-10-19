@@ -24,7 +24,7 @@ unk_text_limit = 100
 
 # Set the Hyperparameters
 epochs = 100
-batch_size = 32
+batch_size = 16
 rnn_size = 256
 num_layers = 2
 learning_rate = 0.005
