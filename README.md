@@ -23,3 +23,26 @@
 
     1) Run data_preprocessing.py (make sure paths are corrected in config.py)
     2) Run train_model.py
+
+**Prerequisite GPU support**    
+    
+    1) Tensorflow currently support only NVIDIA GPUs that to not all..
+    2) Verify if supported GPU is installed - https://www.addictivetips.com/windows-tips/check-dedicated-gpu/
+    3) Check if GPU is supported by CUDA (CUDA is required to integrate GPU and tensorflow) - https://developer.nvidia.com/cuda-gpus
+    4) Install latest version of Cuda toolkit as per GPU* (https://en.wikipedia.org/wiki/CUDA)- download & install base and patch if exists.
+    5) Download and install CUDNN as per Cuda version* - https://developer.nvidia.com/rdp/cudnn-download (Need to register)
+       *Latest version of tensorflow required CUDA toolkit 9 and CUDNN 7.5
+    6) Known issues - 
+        https://medium.com/@kelfun5354/step-by-step-guide-to-install-tensorflow-cpu-gpu-for-windows-7-b472327984cd
+        https://devtalk.nvidia.com/default/topic/1033111/cuda-setup-and-installation/cuda-9-1-cannot-install-due-to-failed-visual-studio-integration/2
+
+
+**Enable GPU support**
+
+    1) Make sure 'enable_gpu = True' in config.py
+    2) From root of project run -
+        python setup.py install 
+       [Verify in logs that 'tensorflow-gpu==1.10.0' is installed]
+    3) Run train_model.py
+
+    

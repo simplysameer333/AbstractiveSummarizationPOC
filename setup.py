@@ -1,14 +1,21 @@
 from setuptools import setup, find_packages
 
+from code import config
+
+tensorflow_version = 'tensorflow-gpu==1.10.0'
+if not config.enable_gpu:
+    tensorflow_version = 'tensorflow==1.10.0'
+
 setup(
     name="ML",
     version="0.1",
     packages=find_packages(),
-    scripts=['train_model.py'],
+    scripts=['code/train_model.py'],
 
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
-    install_requires=['tensorflow==1.10', 'nltk', 'numpy', 'pandas', 'gensim'],
+
+    install_requires=[tensorflow_version, 'nltk', 'numpy', 'pandas', 'gensim'],
 
     package_data={
         # If any package contains *.txt or *.rst files, include them:

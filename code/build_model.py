@@ -43,31 +43,6 @@ def process_encoding_input(target_data, vocab_to_int, batch_size):
     return process_input
 
 
-def encoding_layer(rnn_size, article_length, num_layers, rnn_inputs, keep_prob):
-    '''Create the encoding layer'''
-
-    # Number of layer inside neural network
-    for layer in range(num_layers):
-        with tf.variable_scope('encoder_{}'.format(layer)):
-
-            # forward direction cell with random weights with seed value for reproduce random value
-            cell_fw = tf.contrib.rnn.LSTMCell(rnn_size, initializer=tf.random_uniform_initializer(-0.1, 0.1, seed=2))
-
-            # Dropout to kills cells that are not changing.
-            cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob)
-
-            cell_bw = tf.contrib.rnn.LSTMCell(rnn_size, initializer=tf.random_uniform_initializer(-0.1, 0.1, seed=2))
-            cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob)
-
-            # Bidirectional as it is more optimized, spl with Dropouts
-            enc_output, enc_state = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, rnn_inputs, article_length, dtype=tf.float32)
-
-    # Join outputs since we are using a bidirectional RNN
-    enc_output = tf.concat(enc_output, 2)
-
-    return enc_output, enc_state
-
-
 def train_decoding_layer(dec_embed_input, headline_length, dec_cell, initial_state, output_layer, max_headline_length):
     '''Create the training logits'''
 
@@ -88,29 +63,13 @@ def train_decoding_layer(dec_embed_input, headline_length, dec_cell, initial_sta
     return training_logits
 
 
-def inference_decoding_layer(embeddings, start_token, end_token, dec_cell, initial_state, output_layer,
-                             max_headline_length, batch_size):
+def inference_decoding_layer(embeddings, start_token, end_token, dec_cell, output_layer, max_headline_length,
+                             enc_state_tiled, batch_size):
     '''Create the inference logits'''
 
     start_tokens = tf.tile(tf.constant([start_token], dtype=tf.int32), [batch_size], name='start_tokens')
-    '''
-    # For Basic decoder
-    # GreedyEmbeddingHelper - > Select top probability out
-    inference_helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(embeddings,
-                                                                start_tokens,
-                                                                end_token)
-
-    inference_decoder = tf.contrib.seq2seq.BasicDecoder(dec_cell,
-                                                        inference_helper,
-                                                        initial_state,
-                                                        output_layer)
-
-    inference_logits, _, _ = tf.contrib.seq2seq.dynamic_decode(inference_decoder,
-                                                               output_time_major=False,
-                                                               impute_finished=True,
-                                                               maximum_iterations=max_headline_length)
-    '''
-    beam_initial_state = dec_cell.zero_state(config.batch_size * config.beam_width, tf.float32)
+    beam_initial_state = dec_cell.zero_state(batch_size=config.batch_size * config.beam_width,
+                                             dtype=enc_state_tiled[0].dtype).clone(cell_state=enc_state_tiled[0])
 
     inference_decoder = tf.contrib.seq2seq.BeamSearchDecoder(
         cell=dec_cell,
@@ -127,6 +86,7 @@ def inference_decoding_layer(embeddings, start_token, end_token, dec_cell, initi
         impute_finished=False,
         maximum_iterations=2 * max_headline_length)
 
+
     return inference_logits
 
 
@@ -141,24 +101,38 @@ def decoding_layer(dec_embed_input, embeddings, enc_output, enc_state, vocab_siz
             dec_cell = tf.contrib.rnn.DropoutWrapper(lstm, input_keep_prob=keep_prob)
 
     # creating Dense- This is also called out layer. This will produce the summary.
-    output_layer = Dense(vocab_size, activation='relu', kernel_initializer=
-    tf.truncated_normal_initializer(mean=0.0, stddev=0.1))
+    output_layer = Dense(vocab_size, activation='relu', kernel_initializer
+    =tf.truncated_normal_initializer(mean=0.0, stddev=0.1))
 
     # Using BahdanauAttention as one of the widely used Attention Algorithms
-    attn_mech = tf.contrib.seq2seq.BahdanauAttention(rnn_size, enc_output, article_length,
+    with tf.variable_scope('shared_attention_mechanism'):
+        attn_mech = tf.contrib.seq2seq.BahdanauAttention(rnn_size, enc_output, article_length,
                                                      normalize=False, name='BahdanauAttention')
 
-    dec_cell = tf.contrib.seq2seq.AttentionWrapper(dec_cell, attn_mech, rnn_size)
-    initial_state = dec_cell.zero_state(batch_size=batch_size, dtype=enc_state[0].dtype).clone(cell_state=enc_state[0])
+    dec_cell_atten = tf.contrib.seq2seq.AttentionWrapper(dec_cell, attn_mech, rnn_size)
+    initial_state = dec_cell_atten.zero_state(batch_size=batch_size, dtype=enc_state[0].dtype).clone(
+        cell_state=enc_state[0])
 
     # Creating training logits - which would be used during training dataset
     with tf.variable_scope("decode"):
         training_logits = train_decoding_layer(dec_embed_input,
                                                headline_length,
-                                               dec_cell,
+                                               dec_cell_atten,
                                                initial_state,
                                                output_layer,
                                                max_headline_length)
+
+    # BEAM SEARCH TILE
+    enc_output_tiled = tf.contrib.seq2seq.tile_batch(enc_output, multiplier=config.beam_width)
+    enc_state_tiled = tf.contrib.seq2seq.tile_batch(enc_state, multiplier=config.beam_width)
+    article_length_tiled = tf.contrib.seq2seq.tile_batch(article_length, multiplier=config.beam_width)
+
+    # Using BahdanauAttention as one of the widely used Attention Algorithms
+    with tf.variable_scope('shared_attention_mechanism', reuse=True):
+        attn_mech = tf.contrib.seq2seq.BahdanauAttention(rnn_size, enc_output_tiled, article_length_tiled,
+                                                         normalize=False, name='BahdanauAttention')
+
+    dec_cell = tf.contrib.seq2seq.AttentionWrapper(dec_cell, attn_mech, rnn_size)
 
     # Creating inference logits - which would produce out using train model
     with tf.variable_scope("decode", reuse=True):
@@ -166,12 +140,37 @@ def decoding_layer(dec_embed_input, embeddings, enc_output, enc_state, vocab_siz
                                                     vocab_to_int['<GO>'],
                                                     vocab_to_int['<EOS>'],
                                                     dec_cell,
-                                                    initial_state,
                                                     output_layer,
                                                     max_headline_length,
+                                                    enc_state_tiled,
                                                     batch_size)
 
     return training_logits, inference_logits
+
+
+def encoding_layer(rnn_size, article_length, num_layers, rnn_inputs, keep_prob):
+    '''Create the encoding layer'''
+
+    # Number of layer inside neural network
+    for layer in range(num_layers):
+        with tf.variable_scope('encoder_{}'.format(layer)):
+            # forward direction cell with random weights with seed value for reproduce random value
+            cell_fw = tf.contrib.rnn.LSTMCell(rnn_size, initializer=tf.random_uniform_initializer(-0.1, 0.1, seed=2))
+
+            # Dropout to kills cells that are not changing.
+            cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob)
+
+            cell_bw = tf.contrib.rnn.LSTMCell(rnn_size, initializer=tf.random_uniform_initializer(-0.1, 0.1, seed=2))
+            cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob)
+
+            # Bidirectional as it is more optimized, spl with Dropouts
+            enc_output, enc_state = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, rnn_inputs, article_length,
+                                                                    dtype=tf.float32)
+
+    # Join outputs since we are using a bidirectional RNN
+    enc_output = tf.concat(enc_output, 2)
+
+    return enc_output, enc_state
 
 
 def seq2seq_model(input_data, target_data, keep_prob, article_length, headline_length, max_headliney_length,
@@ -196,6 +195,7 @@ def seq2seq_model(input_data, target_data, keep_prob, article_length, headline_l
     dec_embed_input = tf.nn.embedding_lookup(embeddings, dec_input)
 
     print("Getting decoding_layer logits ... ")
+
     # Train: Learn model parameters.
     # Inference: Apply model on unseen data to assess performance.
     training_logits, inference_logits = decoding_layer(dec_embed_input,
@@ -267,9 +267,11 @@ def build_graph(vocab_to_int, word_embedding_matrix):
                                 for grad, var in gradients if grad is not None]
             train_op = optimizer.apply_gradients(capped_gradients)
     print("Graph is built.")
+
     # input_data, targets, lr, keep_prob, headline_length, max_headline_length, article_length
     return train_graph, train_op, cost, input_data, targets, lr, keep_prob, \
            headline_length, max_headline_length, article_length
+
 
 def main():
     print('TensorFlow Version: {}'.format(tf.__version__))  # we are using 1.10

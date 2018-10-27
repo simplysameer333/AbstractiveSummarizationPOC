@@ -162,6 +162,6 @@ def main():
 
 
 '''-------------------------main------------------------------'''
-main()
+# main()
 
 ''' FULL process takes 12 hours 15 mins'''

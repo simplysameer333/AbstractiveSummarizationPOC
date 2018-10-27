@@ -44,7 +44,7 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
     headlines_update_loss = []
 
     # name given to checkpoint
-    checkpoint = "./../out/best_model.ckpt"
+    checkpoint = config.checkpoint
 
     # This make sures that in one epoch it only checked as per value specified of per_epoch
     # e.g if length of article is 4000 the => 4000 / 32 (bath size) = > 125
@@ -56,11 +56,17 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
     print("init value of update_check", update_check)
     gr_learning_rate = config.learning_rate
 
-    with tf.Session(graph=train_graph) as sess:
+    session_config = tf.ConfigProto(device_count={'GPU': 1})
+    session_config.gpu_options.allocator_type = 'BFC'
+    session_config.gpu_options.allow_growth = True
+    if not config.enable_gpu:
+        session_config = tf.ConfigProto(device_count={'GPU': 0})
+
+    with tf.Session(graph=train_graph, config=session_config) as sess:
         # This is to show graph in tensorboard
         # project path tensorboard --logdir = logs - -port 6006
         # TensorBoard 1.10.0 at http: // Sam: 6006(Press CTRL + C to quit)
-        tf.summary.FileWriter('../logs', graph=sess.graph)
+        tf.summary.FileWriter(config.tensorboard_logs, graph=sess.graph)
         sess.run(tf.global_variables_initializer())
 
         # If we want to continue training a previous session
@@ -74,7 +80,7 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
                           articles_lengths) in enumerate(get_batches(sorted_headlines_short,
                                                                      sorted_articles_short, config.batch_size,
                                                                      vocab_to_int)):
-                print("batch_i ==== ", batch_i)
+                # print("batch_i ==== ", batch_i)
                 start_time = time.time()
                 _, loss = sess.run(
                     [train_op, cost],
@@ -109,11 +115,10 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
 
                     # If the update loss is at a new minimum, save the model
                     if update_loss <= min(headlines_update_loss):
-                        print('New Record!')
                         stop_early = 0
                         saver = tf.train.Saver()
                         saver.save(sess, checkpoint)
-
+                        print('New Record! - checkpoint saved')
                     else:
                         print("No Improvement.")
                         stop_early += 1
@@ -142,7 +147,7 @@ def main():
     # Subset the data for training, this is used to check if steps are working fine.
     # In actual run whole data should be taken
     start = config.start
-    end = start + 4000
+    end = start + config.end
 
     print("Total Articles that we have for this run :", len(sorted_articles))
     # Train the Model

@@ -104,7 +104,7 @@ def covert_vocab_to_int(word_counts, embeddings_index):
     print("Number of words we will use:", len(vocab_to_int))
     print("Percent of words we will use: {}%".format(usage_ratio))
 
-    return vocab_to_int
+    return vocab_to_int, int_to_vocab
 
 
 def create_combine_word_matrix(vocab_to_int, embeddings_index):
@@ -238,7 +238,13 @@ def create_input_for_graph():
 
     '''dictionary to convert words to integers - This is to found total words count that we get from aur corpus(input date)
     and out of that what % of words we would be using. This is after removing words that count less than threshold'''
-    vocab_to_int = covert_vocab_to_int(word_counts, embeddings_index)
+    vocab_to_int, int_to_vocab = covert_vocab_to_int(word_counts, embeddings_index)
+    # persist vocab_to_int for use in generate stage
+    with open(config.base_path + config.vocab_to_int_pickle_filename, 'wb') as handle:
+        pickle.dump(vocab_to_int, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open(config.base_path + config.int_to_vocab_pickle_filename, 'wb') as handle:
+        pickle.dump(int_to_vocab, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     word_embedding_matrix = create_combine_word_matrix(vocab_to_int, embeddings_index)
 
