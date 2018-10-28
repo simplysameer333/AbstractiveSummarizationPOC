@@ -19,7 +19,7 @@ tensorboard_logs = '../logs'
 
 # to avoid words that are used less that threshold value
 threshold = 2
-enable_gpu = True
+enable_gpu = False
 
 # Dimension size as per pre-trained data
 embedding_dim = 300

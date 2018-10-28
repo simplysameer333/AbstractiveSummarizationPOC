@@ -1,9 +1,4 @@
 import pickle
-import numpy as np
-import tensorflow as tf
-import data_processing as dp
-import config
-import pickle
 
 import config
 import data_processing as dp
@@ -11,6 +6,8 @@ import numpy as np
 import tensorflow as tf
 
 
+# This import is required becasue of tensorflow bug
+# from tensorflow.contrib.seq2seq.python.ops import beam_search_ops
 def text_to_cleanedup(text, vocab_to_int):
     '''Cleanup text before passing it to inference_stage'''
     text = dp.clean_text(text.split('\n'))
@@ -25,11 +22,11 @@ def inference_stage(input_cleaned_test):
     checkpoint = config.checkpoint
 
     loaded_graph = tf.Graph()
-    session_config = tf.ConfigProto(device_count={'GPU': 1})
-    session_config.gpu_options.allocator_type = 'BFC'
-    session_config.gpu_options.allow_growth = True
-    if not config.enable_gpu:
-        session_config = tf.ConfigProto(device_count={'GPU': 0})
+    session_config = tf.ConfigProto(device_count={'GPU': 0})
+    if config.enable_gpu:
+        session_config = tf.ConfigProto(device_count={'GPU': 1})
+        session_config.gpu_options.allocator_type = 'BFC'
+        session_config.gpu_options.allow_growth = True
 
     with tf.Session(graph=loaded_graph, config=session_config) as sess:
         # Load saved model

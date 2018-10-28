@@ -6,6 +6,7 @@ import tensorflow as tf
 from code import config, build_model, vectorization
 
 
+# from tensorflow.contrib.seq2seq.python.ops import beam_search_ops
 # This could later be improved as tensorflow provide that put padding by it owns.
 def pad_sentence_batch(sentence_batch, vocab_to_int):
     """Pad sentences with <PAD> so that each sentence of a batch has the same length"""
@@ -56,11 +57,11 @@ def train_model(train_graph, train_op, cost, gen_input_data, gen_targets, gen_lr
     print("init value of update_check", update_check)
     gr_learning_rate = config.learning_rate
 
-    session_config = tf.ConfigProto(device_count={'GPU': 1})
-    session_config.gpu_options.allocator_type = 'BFC'
-    session_config.gpu_options.allow_growth = True
-    if not config.enable_gpu:
-        session_config = tf.ConfigProto(device_count={'GPU': 0})
+    session_config = tf.ConfigProto(device_count={'GPU': 0})
+    if config.enable_gpu:
+        session_config = tf.ConfigProto(device_count={'GPU': 1})
+        session_config.gpu_options.allocator_type = 'BFC'
+        session_config.gpu_options.allow_growth = True
 
     with tf.Session(graph=train_graph, config=session_config) as sess:
         # This is to show graph in tensorboard

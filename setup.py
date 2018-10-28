@@ -2,9 +2,10 @@ from setuptools import setup, find_packages
 
 from code import config
 
-tensorflow_version = 'tensorflow-gpu==1.10.0'
+tensorflow_version = 'tensorflow==1.10.0'
 if not config.enable_gpu:
-    tensorflow_version = 'tensorflow==1.10.0'
+    tensorflow_version = 'tensorflow-gpu==1.10.0'
+
 
 setup(
     name="ML",
