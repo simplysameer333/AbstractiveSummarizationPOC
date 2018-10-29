@@ -26,7 +26,7 @@
 
 **Prerequisite GPU support**    
     
-    1) Tensorflow currently support only NVIDIA GPUs that to not all..
+    1) Tensorflow currently support only NVIDIA GPUs (that to not all GPSus).
     2) Verify if supported GPU is installed - https://www.addictivetips.com/windows-tips/check-dedicated-gpu/
     3) Check if GPU is supported by CUDA (CUDA is required to integrate GPU and tensorflow) - https://developer.nvidia.com/cuda-gpus
     4) Install latest version of Cuda toolkit as per GPU* (https://en.wikipedia.org/wiki/CUDA)- download & install base and patch if exists.
