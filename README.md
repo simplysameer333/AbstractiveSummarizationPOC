@@ -27,7 +27,7 @@
 **5) Prerequisite GPU support**    
 1) Tensorflow currently support only NVIDIA GPUs (that to not all GPSus).
 2) [Verify](https://www.addictivetips.com/windows-tips/check-dedicated-gpu/) if supported GPU is installed.
-3) Check if GPU is [supported by CUDA](https://developer.nvidia.com/cuda-gpus). CUDA is required to integrate GPU and tensorflow.
+3) Check if GPU is [supported by CUDA](https://developer.nvidia.com/cuda-gpus). CUDA package is required to enable GPU processing with tensorflow.
 4) Install latest version of [Cuda toolkit](https://en.wikipedia.org/wiki/CUDA) as per GPU* - download & install base and patch if exists.
 5) Download and install [CUDNN](https://developer.nvidia.com/rdp/cudnn-download) as per Cuda version* (Need to register).
 6) Known issues : [Step to install](https://medium.com/@kelfun5354/step-by-step-guide-to-install-tensorflow-cpu-gpu-for-windows-7-b472327984cd) and [VS integration issue](https://devtalk.nvidia.com/default/topic/1033111/cuda-setup-and-installation/cuda-9-1-cannot-install-due-to-failed-visual-studio-integration/2).
