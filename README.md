@@ -1,16 +1,16 @@
 # Abstract Summarization
 
-**Prerequisite packages** -
+**1) Prerequisite packages** -
 
 1) [Python 3.6.6](https://www.python.org/downloads/release/python-366/)
 2) [PyCharm 2018.2](https://download.jetbrains.com/python/pycharm-community-2018.2.3.exe)
     
     
-**Install dependencies**
+**2) Install dependencies**
 
     python setup.py install
         
-**Steps to download data**
+**3) Steps to download data**
 1) Navigate to [CNN Mail](https://cs.nyu.edu/~kcho/DMQA/) - download 'stories' from CNN dataset.
 2) Unzip the file.
 3) Update the paths in config.py(inside POC project) as per you machine.
@@ -19,12 +19,12 @@
 6) Unzip vector and put inside model folder.
 7) Verify the paths in config.py.
     
-**Steps to train model**
+**4) Steps to train model**
 
     1) Run data_preprocessing.py (make sure paths are corrected in config.py)
     2) Run train_model.py
 
-**Prerequisite GPU support**    
+**5) Prerequisite GPU support**    
 1) Tensorflow currently support only NVIDIA GPUs (that to not all GPSus).
 2) [Verify](https://www.addictivetips.com/windows-tips/check-dedicated-gpu/) if supported GPU is installed.
 3) Check if GPU is [supported by CUDA](https://developer.nvidia.com/cuda-gpus). CUDA is required to integrate GPU and tensorflow.
@@ -34,7 +34,7 @@
 
 *Latest version of tensorflow required CUDA toolkit 9 and CUDNN 7.5.
 
-**Enable GPU support**
+**6) Enable GPU support**
 
     1) Make sure 'enable_gpu = True' in config.py
     2) From root of project run -
