@@ -41,5 +41,3 @@
         python setup.py install 
        [Verify in logs that 'tensorflow-gpu==1.10.0' is installed]
     3) Run train_model.py
-
-    
