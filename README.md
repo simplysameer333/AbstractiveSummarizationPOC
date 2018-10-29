@@ -2,8 +2,9 @@
 
 **Prerequisite packages** -
 
-    1) Python 3.6.6 - https://www.python.org/downloads/release/python-366/
-    2) PyCharm 2018.2 - https://download.jetbrains.com/python/pycharm-community-2018.2.3.exe
+1) [Python 3.6.6](https://www.python.org/downloads/release/python-366/)
+2) [PyCharm 2018.2](https://download.jetbrains.com/python/pycharm-community-2018.2.3.exe)
+    
     
 **Install dependencies**
 
