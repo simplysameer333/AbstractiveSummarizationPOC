@@ -16,7 +16,7 @@ setup(
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
 
-    install_requires=[tensorflow_version, 'nltk', 'numpy', 'pandas', 'gensim'],
+    install_requires=[tensorflow_version, 'nltk', 'numpy==1.13.3', 'pandas', 'gensim'],
 
     package_data={
         # If any package contains *.txt or *.rst files, include them:
