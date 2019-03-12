@@ -8,7 +8,7 @@ from nltk.corpus import wordnet
 
 from code import config
 
-# Stopword list
+# Stopword list - Uncomment below 3 lines if you are running it first time.
 # nltk.download()
 # print ("Downloading stopwords ......")
 # nltk.download('stopwords')
