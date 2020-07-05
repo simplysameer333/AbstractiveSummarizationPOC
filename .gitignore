@@ -7,6 +7,10 @@
 **/__pycache__/*
 **/code/__pycache__/*
 **/ML.egg-info/*
-**/model/*
 **/.ipynb_checkpoints/*
 **/venv/*
+data/articles_full.pickle
+data/headlines_full.pickle
+data/int_to_vocab.pickle
+data/vocab_to_int.pickle
+model/wiki-news-300d-1M.vec
